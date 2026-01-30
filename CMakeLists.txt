@@ -15,5 +15,6 @@ add_executable(movfuscator
     src/mov.cpp
     src/movinit.cpp
     src/push.cpp
+    src/jmp.cpp
 )
 

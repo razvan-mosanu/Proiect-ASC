@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/movinit.h"
+#include "movinit.h"
 
 extern void ParsareAdd(string linie);
 extern void ParsareInc(string linie);

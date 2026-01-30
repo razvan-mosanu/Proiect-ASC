@@ -4,6 +4,7 @@
 #include "../include/push.h"
 #include "../include/cmp.h"
 #include "../include/logic.h"
+#include "../include/jmp.h"
 
 /**
 De facut:
@@ -76,110 +77,64 @@ void Parsare()
         poz = linie.find("je");
         if(poz != string::npos)
         {
-            Prelucrare_Linie(linie);
-            string v = linie.substr(3);
-            fout << " cmpb $1, flag_zero\n";
-            fout << " je "<< v << "\n";
+            ParsareJe(linie);
             continue;
         }
         poz = linie.find("jne");
         if(poz == string::npos) poz = linie.find("jnz");
         if(poz != string::npos)
         {
-            Prelucrare_Linie(linie);
-            string v = linie.substr(4);
-            fout << " cmpb $0, flag_zero\n";
-            fout << " je " << v << "\n";
+            ParsareJne(linie);
             continue;
         }
         poz = linie.find("jb");
         if(poz == string::npos) poz = linie.find("jc");
         if(poz != string::npos)
         {
-            Prelucrare_Linie(linie);
-            string v = linie.substr(3);
-            fout << " cmpb $1, flag_below\n";
-            fout << " je " << v << "\n";
+            ParsareJb(linie);
             continue;
         }
         poz = linie.find("jae");
         if(poz == string::npos) poz = linie.find("jnb");
         if(poz != string::npos)
         {
-            Prelucrare_Linie(linie);
-            string v = linie.substr(4);
-            fout << " cmpb $0, flag_below\n";
-            fout << " je " << v << "\n";
+            ParsareJae(linie);
             continue;
         }
         poz = linie.find("ja");
         if(poz != string::npos)
         {
-            Prelucrare_Linie(linie);
-            static int label_count = 0;
-            string v = linie.substr(3);
-            string skip_label = "skip_ja_" + to_string(label_count++);
-            fout << " cmpb $1, flag_below\n";
-            fout << " je " << skip_label << "\n";
-            fout << " cmpb $1, flag_zero\n";
-            fout << " je " << skip_label << "\n";
-            fout << " jmp " << v << "\n";
-            fout << " " << skip_label << ":\n";
+            ParsareJa(linie);
             continue;
         }
         poz = linie.find("jbe");
         if(poz != string::npos)
         {
-            Prelucrare_Linie(linie);
-            string v = linie.substr(4);
-            fout << " cmpb $1, flag_below\n";
-            fout << " je " << v << "\n";
-            fout << " cmpb $1, flag_zero\n";
-            fout << " je " << v << "\n";
+            ParsareJbe(linie);
             continue;
         }
         poz = linie.find("jl");
         if(poz != string::npos && linie.find("jle") == string::npos)
         {
-            Prelucrare_Linie(linie);
-            string v = linie.substr(3);
-            fout << " cmpb $1, flag_less\n";
-            fout << " je " << v << "\n";
+            ParsareJl(linie);
             continue;
         }
         poz = linie.find("jle");
         if(poz != string::npos)
         {
-            Prelucrare_Linie(linie);
-            string v = linie.substr(4);
-            fout << " cmpb $1, flag_less\n";
-            fout << " je " << v << "\n";
-            fout << " cmpb $1, flag_zero\n";
-            fout << " je " << v << "\n";
+            ParsareJle(linie);
             continue;
         }
         poz = linie.find("jge");
         if(poz != string::npos)
         {
-            Prelucrare_Linie(linie);
-            string v = linie.substr(4);
-            fout << " cmpb $0, flag_less\n";
-            fout << " je " << v << "\n";
+            ParsareJge(linie);
             continue;
         }
         poz = linie.find("jg");
         if(poz != string::npos && linie.find("jge") == string::npos)
         {
-            Prelucrare_Linie(linie);
-            string v = linie.substr(3);
-            static int skip_jg = 0;
-            string label = "not_jg_" + to_string(skip_jg++);
-            fout << " cmpb $1, flag_less\n";
-            fout << " je " << label << "\n";
-            fout << " cmpb $1, flag_zero\n";
-            fout << " je " << label << "\n";
-            fout << " jmp " << v << "\n";
-            fout << " " << label << ":\n";
+            ParsareJg(linie);
             continue;
         }
         poz = linie.find("xor");

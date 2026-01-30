@@ -1,24 +1,21 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <sstream>
 #include <unordered_map>
+#include <algorithm>
+#include <cctype>
 using namespace std;
 
-ifstream fin("aranjare.in");
-ofstream fout("aranjare.out");
+ifstream fin("");
+ofstream fout("");
 
 int N = 16; // 4 biti
 /**
 De facut:
 -mul
--div
--and
--or
--test
 -shl
 -shr
--loop
-
 */
 
 unordered_map<string, int> fr;
@@ -298,6 +295,93 @@ void Sub_Indice_Linie()
     fout << "\n";
 }
 
+
+void Tabel_Div()
+{
+    int i, j, res;
+    fout << "tabel_div:\n";
+    for (i = 0; i < N; i++)
+    {
+        fout << " .byte ";
+        for (j = 0; j < N; j++)
+        {
+            res = (j == 0) ? 0 : i / j;
+            fout << (j == 0 ? "" : ",") << res;
+        }
+        fout << "\n";
+    }
+}
+
+void Tabel_Mod()
+{
+    int i, j, res;
+    fout << "tabel_mod:\n";
+    for (i = 0; i < N; i++)
+    {
+        fout << " .byte ";
+        for(j = 0; j < N; j++)
+        {
+            res = (j == 0) ? 0 : i % j;
+            fout << (j == 0 ? "" : ",") << res;
+        }
+        fout << "\n";
+    }
+}
+
+void Indici_Tabel_Div()
+{
+    int i;
+    fout << "div_indice_linie:\n";
+    for (i = 0; i < N; i++)
+        fout << " .long tabel_div + " << i * N << "\n";
+    fout << "\n";
+    fout << "mod_indice_linie:\n";
+    for (i = 0; i < N; i++)
+        fout << " .long tabel_mod + " << i * N << "\n";
+    fout << "\n";
+}
+
+void Tabel_And()
+{
+    int i, j;
+    fout << "tabel_and:\n";
+    for (i = 0; i < N; i++)
+    {
+        fout << " .byte ";
+        for (j = 0; j < N; j++)
+            fout << (j == 0 ? "" : ",") << (i & j);
+        fout << "\n";
+    }
+}
+
+void Tabel_Or()
+{
+    int i, j;
+    fout << "tabel_or:\n";
+    for (i = 0; i < N; i++)
+    {
+        fout << " .byte ";
+        for (j = 0; j < N; j++)
+            fout << (j == 0 ? "" : ",") << (i | j);
+        fout << "\n";
+    }
+}
+
+void Indici_Tabele_Logice()
+{
+    int i;
+
+    fout << "and_indice_linie:\n";
+    for (i = 0; i < N; i++)
+        fout << " .long tabel_and + " << i * N << "\n";
+    fout << "\n";
+
+    fout << "or_indice_linie:\n";
+    for (i = 0; i < N; i++)
+        fout << " .long tabel_or + " << i * N << "\n";
+    fout << "\n";
+}
+
 void Parsare()
 {
     string linie;
@@ -326,6 +410,12 @@ void Parsare()
             Indici_Tabel_Xor();
             Tabel_Signed_Less();
             Indici_Tabel_Signed_Less();
+            Tabel_Div();
+            Tabel_Mod();
+            Indici_Tabel_Div();
+            Tabel_And();
+            Tabel_Or();
+            Indici_Tabele_Logice();
             continue;
         }
         poz = linie.find("mov");
@@ -1021,15 +1111,193 @@ void Parsare()
         poz = linie.find("lea");
         if(poz != string::npos)
         {
-            Scoatere_Instructiune(linie, instructiune, v1, v2);
-            if(v1[0] != '$' && v1[0] != '%' && v2[0] == '%')
+            size_t p_open = linie.find('(');
+            size_t p_close = linie.find(')');
+
+            if(p_open != string::npos && p_close != string::npos)
             {
-                string reg_dest = v2.substr(1);
-                int off = off_set(reg_dest);
+                string disp = "";
+                size_t lea_idx = linie.find("lea");
+                disp = linie.substr(lea_idx + 3, p_open - (lea_idx + 3));
+                string interior = linie.substr(p_open + 1, p_close - p_open - 1);
+                string baza = "", index = "", scara = "1";
+                size_t c1 = interior.find(',');
+                if(c1 == string::npos) baza = interior;
+                else
+                {
+                    baza = interior.substr(0, c1);
+                    size_t c2 = interior.find(',', c1 + 1);
+                    if(c2 == string::npos) index = interior.substr(c1 + 1);
+                    else
+                    {
+                        index = interior.substr(c1 + 1, c2 - c1 - 1);
+                        scara = interior.substr(c2 + 1);
+                    }
+                }
+
+                size_t virgula_ext = linie.find(',', p_close);
+                string dest = linie.substr(virgula_ext + 1);
+                auto curata = [&](string &s)
+                {
+                    s.erase(remove(s.begin(), s.end(), ' '), s.end());
+                    s.erase(remove(s.begin(), s.end(), '\t'), s.end());
+                    s.erase(remove(s.begin(), s.end(), '\r'), s.end());
+                    if(!s.empty() && s[0] == '%') s = s.substr(1);
+                };
+                curata(disp);
+                curata(baza);
+                curata(index);
+                curata(scara);
+                curata(dest);
+                int off_d = off_set(dest);
+                if(off_d == -1) Eroare();
+                if(!baza.empty())
+                {
+                    int off_b = off_set(baza);
+                    fout << " movl variabile+" << off_b << ", %ebx\n";
+                }
+                else fout << " xorl %ebx, %ebx\n";
+                if(!index.empty())
+                {
+                    int off_i = off_set(index);
+                    fout << " movl variabile+" << off_i << ", %esi\n";
+                }
+                else fout << " xorl %esi, %esi\n";
+                string prefix_disp = (disp.empty() ? "" : "$" + disp);
+                if(!disp.empty() && isdigit(disp[0])) prefix_disp = disp;
+                if(!disp.empty() && !isdigit(disp[0])) fout << " leal " << disp << "(%ebx, %esi, " << scara << "), %eax\n";
+                else fout << " leal " << (disp.empty() ? "0" : disp) << "(%ebx, %esi, " << scara << "), %eax\n";
+                fout << " movl %eax, variabile+" << off_d << "\n";
+            }
+            else
+            {
+                string r = v2;
+                if(r[0] == '%') r = r.substr(1);
+                int off = off_set(r);
                 if(off == -1) Eroare();
                 fout << " movl $" << v1 << ", %eax\n";
                 fout << " movl %eax, variabile+" << off << "\n";
             }
+            continue;
+        }
+        poz = linie.find("div");
+        if(poz != string::npos)
+        {
+            Prelucrare_Linie(linie);
+            string v = "";
+            size_t procent = linie.find('%');
+            fout << " movzbl variabile+0, %eax\n";
+            fout << " movzbl tabel_mask(%eax), %eax\n";
+            if(procent != string::npos)
+            {
+                v = linie.substr(procent + 1);
+                int off = off_set(v);
+                if(off == -1) Eroare();
+                fout << " movzbl variabile+" << off << ", %ebx\n";
+            }
+            else
+            {
+                v = linie.substr(4);
+                fout << " movzbl " << v << ", %ebx\n";
+            }
+            fout << " movzbl tabel_mask(%ebx), %ebx\n";
+            fout << " movl div_indice_linie(,%eax,4), %ecx\n";
+            fout << " movzbl (%ecx,%ebx,1), %edx\n";
+            fout << " movl %edx, variabile+0\n";
+            fout << " movl mod_indice_linie(,%eax,4), %ecx\n";
+            fout << " movzbl (%ecx,%ebx,1), %edx\n";
+            fout << " movl %edx, variabile+12\n";
+            continue;
+        }
+        poz = linie.find("and");
+        if(poz != string::npos && linie.find("and_indice") == string::npos)
+        {
+            Scoatere_Instructiune(linie, instructiune, v1, v2);
+            string r_src = v1;
+            if(r_src[0] == '%' || r_src[0] == '$') r_src = r_src.substr(1);
+            string r_dest = v2;
+            if(r_dest[0] == '%') r_dest = r_dest.substr(1);
+            int off_src = (v1[0] == '%') ? off_set(r_src) : -1;
+            int off_dest = off_set(r_dest);
+            if(off_dest == -1) Eroare();
+            if(v1[0] == '$') fout << " movl " << v1 << ", %eax\n";
+            else fout << " movzbl variabile+" << off_src << ", %eax\n";
+            fout << " movzbl tabel_mask(%eax), %eax\n";
+            fout << " movzbl variabile+" << off_dest << ", %ebx\n";
+            fout << " movzbl tabel_mask(%ebx), %ebx\n";
+            fout << " movl and_indice_linie(,%eax,4), %ecx\n";
+            fout << " movzbl (%ecx,%ebx,1), %edx\n";
+            fout << " movl %edx, variabile+" << off_dest << "\n";
+            fout << " movl zero_indice_linie(,%edx,4), %ecx\n";
+            fout << " movzbl (%ecx,%edx,1), %eax\n";
+            fout << " movb %al, flag_zero\n";
+            continue;
+        }
+        poz = linie.find("or");
+        if(poz != string::npos && linie.find("or_indice") == string::npos && linie.find("greater_or_equal") == string::npos)
+        {
+            Scoatere_Instructiune(linie, instructiune, v1, v2);
+            string r_src = v1;
+            if(r_src[0] == '%' || r_src[0] == '$') r_src = r_src.substr(1);
+            string r_dest = v2;
+            if(r_dest[0] == '%') r_dest = r_dest.substr(1);
+            int off_src = (v1[0] == '%') ? off_set(r_src) : -1;
+            int off_dest = off_set(r_dest);
+            if(off_dest == -1) Eroare();
+            if(v1[0] == '$') fout << " movl " << v1 << ", %eax\n";
+            else fout << " movzbl variabile+" << off_src << ", %eax\n";
+
+            fout << " movzbl tabel_mask(%eax), %eax\n";
+            fout << " movzbl variabile+" << off_dest << ", %ebx\n";
+            fout << " movzbl tabel_mask(%ebx), %ebx\n";
+            fout << " movl or_indice_linie(,%eax,4), %ecx\n";
+            fout << " movzbl (%ecx,%ebx,1), %edx\n";
+            fout << " movl %edx, variabile+" << off_dest << "\n";
+            fout << " movl zero_indice_linie(,%edx,4), %ecx\n";
+            fout << " movzbl (%ecx,%edx,1), %eax\n";
+            fout << " movb %al, flag_zero\n";
+            continue;
+        }
+        poz = linie.find("loop");
+        if(poz != string::npos)
+        {
+            Prelucrare_Linie(linie);
+            string eticheta = linie.substr(5);
+            fout << " movzbl variabile+8, %eax\n";
+            fout << " movzbl tabel_mask(%eax), %eax\n";
+            fout << " movl $1, %ebx\n";
+            fout << " movzbl tabel_mask(%ebx), %ebx\n";
+            fout << " movl sub_indice_linie(,%eax,4), %ecx\n";
+            fout << " movzbl (%ecx,%ebx,1), %edx\n";
+            fout << " movl %edx, variabile+8\n";
+            fout << " movl zero_indice_linie(,%edx,4), %ecx\n";
+            fout << " movzbl (%ecx,%edx,1), %eax\n";
+            fout << " movb %al, flag_zero\n";
+            fout << " cmpb $0, flag_zero\n";
+            fout << " je " << eticheta << "\n";
+            continue;
+        }
+        poz = linie.find("test");
+        if(poz != string::npos)
+        {
+            Scoatere_Instructiune(linie, instructiune, v1, v2);
+            string r_src = v1;
+            if(!r_src.empty() && (r_src[0] == '%' || r_src[0] == '$')) r_src = r_src.substr(1);
+            string r_dest = v2;
+            if(!r_dest.empty() && r_dest[0] == '%') r_dest = r_dest.substr(1);
+            int off_src = (v1[0] == '%') ? off_set(r_src) : -1;
+            int off_dest = off_set(r_dest);
+            if(off_dest == -1) Eroare();
+            if(v1[0] == '$') fout << " movl " << v1 << ", %eax\n";
+            else fout << " movzbl variabile+" << off_src << ", %eax\n";
+            fout << " movzbl tabel_mask(%eax), %eax\n";
+            fout << " movzbl variabile+" << off_dest << ", %ebx\n";
+            fout << " movzbl tabel_mask(%ebx), %ebx\n";
+            fout << " movl and_indice_linie(,%eax,4), %ecx\n";
+            fout << " movzbl (%ecx,%ebx,1), %edx\n";
+            fout << " movl zero_indice_linie(,%edx,4), %ecx\n";
+            fout << " movzbl (%ecx,%edx,1), %eax\n";
+            fout << " movb %al, flag_zero\n";
             continue;
         }
         fout << " " << linie << "\n";

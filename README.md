@@ -66,10 +66,15 @@ Proiectul a fost testat cu succes pe exercițiile din **Laboratorul 0x02 și 0x0
 ## 📚 Referințe și Resurse
 Pentru dezvoltarea acestui proiect au fost consultate următoarele resurse privind conceptul de Turing completeness și implementarea originală a Movfuscator-ului:
 
-* *Turing Complete - Computerphile*: O explicație detaliată a conceptului de Turing completeness și a cerințelor minime pentru ca un sistem să poată executa orice calcul.
-* *Christopher Domas - The Movfuscator*: Prezentarea originală a proiectului care demonstrează cum o singură instrucțiune (MOV) poate fi suficientă pentru a crea un sistem complet.
-* *Christopher Domas - DerbyCon 5*: O prezentare aprofundată despre utilizarea Movfuscator ca tehnică de "anti-reverse engineering" prin eliminarea fluxului de control tradițional.
+* **Turing Complete - Computerphile**: O explicație detaliată a conceptului de Turing completeness și a cerințelor minime pentru ca un sistem să poată executa orice calcul.
+    * [Vizionează videoclipul](https://www.youtube.com/watch?v=RPQD7-AOjMI)
+* **Christopher Domas - The Movfuscator**: Prezentarea originală a proiectului care demonstrează cum o singură instrucțiune (MOV) poate fi suficientă pentru a crea un sistem complet.
+    * [Vizionează prezentarea](https://www.youtube.com/watch?v=hsNDLVUzYEs)
+* **Christopher Domas - DerbyCon 5**: O prezentare aprofundată despre utilizarea Movfuscator ca tehnică de "anti-reverse engineering" prin eliminarea fluxului de control tradițional.
+    * [Vizionează prezentarea de la DerbyCon](https://www.youtube.com/watch?v=wiFI5cqE49q)
+* **Proiectul Movfuscator pe GitHub**: Codul sursă și documentația tehnică a compilatorului.
+    * [Accesează repository-ul](https://github.com/xoreaxeaxeax/movfuscator)
 
----
-
+ ---
+ 
 *Proiect realizat pentru disciplina Arhitectura Sistemelor de Calcul.*

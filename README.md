@@ -63,8 +63,6 @@ Proiectul a fost testat cu succes pe exercițiile din **Laboratorul 0x02 și 0x0
 
 ---
 
----
-
 ## 📚 Referințe și Resurse
 Pentru dezvoltarea acestui proiect au fost consultate următoarele resurse privind conceptul de Turing completeness și implementarea originală a Movfuscator-ului:
 

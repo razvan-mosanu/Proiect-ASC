@@ -1,6 +1,7 @@
 #pragma once
 
-#include "movinit.h"
+#include <string>
+using std::string;
 
 extern void ParsareJe(string linie);
 extern void ParsareJne(string linie);

@@ -1,3 +1,4 @@
+#include "movinit.h"
 #include "jmp.h"
 
 void ParsareJe(string linie)

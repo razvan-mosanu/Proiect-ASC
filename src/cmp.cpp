@@ -1,3 +1,4 @@
+#include "movinit.h"
 #include "cmp.h"
 
 void ParsareCmp(string linie)

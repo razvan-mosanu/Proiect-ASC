@@ -1,15 +1,10 @@
 #pragma once
 
-#include <iostream>
 #include <fstream>
 #include <string>
-#include <sstream>
-#include <unordered_map>
-#include <algorithm>
-#include <cctype>
 using namespace std;
 
-const int N = 16; // 4 biti
+const int N = 8; 
 
 extern ifstream fin;
 extern ofstream fout;

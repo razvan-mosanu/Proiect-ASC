@@ -1,28 +1,29 @@
+#include "movinit.h"
 #include "push.h"
 
 void ParsarePush(string linie)
 {
-    Prelucrare_Linie(linie);
-    string v = linie.substr(5);
-    if(v[0] == '%')
+    string cmd, v, rest;
+    Scoatere_Instructiune(linie, cmd, v, rest);
+    if(!v.empty() && v[0] == '%')
     {
-        v = v.substr(1);
-        int off = off_set(v);
+        string reg = v.substr(1);
+        int off = off_set(reg);
         if(off == -1) Eroare();
-        fout << " movl variabile+" << off << ", %" << v << "\n";
-        fout << " push %" << v << "\n";
+        fout << " movl variabile+" << off << ", %eax\n";
+        fout << " push %eax\n";
     }
     else fout << " " << linie << "\n";
 }
 
 void ParsarePop(string linie)
 {
-    Prelucrare_Linie(linie);
-    string v = linie.substr(4);
-    if(v[0] == '%')
+    string cmd, v, rest;
+    Scoatere_Instructiune(linie, cmd, v, rest);
+    if(!v.empty() && v[0] == '%')
     {
-        v = v.substr(1);
-        int off = off_set(v);
+        string reg = v.substr(1);
+        int off = off_set(reg);
         if(off == -1) Eroare();
         fout << " pop %eax\n";
         fout << " movl %eax, variabile+" << off << "\n";

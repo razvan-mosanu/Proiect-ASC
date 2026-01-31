@@ -1,53 +1,117 @@
+#include "movinit.h"
 #include "logic.h"
 
 void ParsareAnd(string linie)
 {
     string instructiune, v1, v2;
     instructiune = v1 = v2 = "";
+
+    
     Scoatere_Instructiune(linie, instructiune, v1, v2);
-    string r_src = v1;
-    if(r_src[0] == '%' || r_src[0] == '$') r_src = r_src.substr(1);
-    string r_dest = v2;
-    if(r_dest[0] == '%') r_dest = r_dest.substr(1);
+    string r_src = v1; if(r_src[0] == '%' || r_src[0] == '$') r_src = r_src.substr(1);
+    string r_dest = v2; if(r_dest[0] == '%') r_dest = r_dest.substr(1);
     int off_src = (v1[0] == '%') ? off_set(r_src) : -1;
     int off_dest = off_set(r_dest);
-    if(off_dest == -1) Eroare();
     if(v1[0] == '$') fout << " movl " << v1 << ", %eax\n";
-    else fout << " movzbl variabile+" << off_src << ", %eax\n";
+    else if(off_src != -1) fout << " movzbl variabile+" << off_src << ", %eax\n";
+    else fout << " movzbl " << v1 << ", %eax\n";
     fout << " movzbl tabel_mask(%eax), %eax\n";
-    fout << " movzbl variabile+" << off_dest << ", %ebx\n";
-    fout << " movzbl tabel_mask(%ebx), %ebx\n";
-    fout << " movl and_indice_linie(,%eax,4), %ecx\n";
-    fout << " movzbl (%ecx,%ebx,1), %edx\n";
-    fout << " movl %edx, variabile+" << off_dest << "\n";
-    fout << " movl zero_indice_linie(,%edx,4), %ecx\n";
-    fout << " movzbl (%ecx,%edx,1), %eax\n";
-    fout << " movb %al, flag_zero\n";
+    if(off_dest != -1)
+    {
+        fout << " movzbl variabile+" << off_dest << ", %ebx\n";
+        fout << " movzbl tabel_mask(%ebx), %ebx\n";
+        fout << " movl and_indice_linie(,%eax,4), %ecx\n";
+        fout << " movzbl (%ecx,%ebx,1), %edx\n";
+        fout << " movl %edx, variabile+" << off_dest << "\n";
+    }
+    else
+    {
+        fout << " movzbl " << v2 << ", %ebx\n";
+        fout << " movzbl tabel_mask(%ebx), %ebx\n";
+        fout << " movl and_indice_linie(,%eax,4), %ecx\n";
+        fout << " movzbl (%ecx,%ebx,1), %edx\n";
+        fout << " movl %edx, " << v2 << "\n";
+    }
 }
 
-void ParsareOr(string linie)
+void ParsareOr(string op1, string op2)
+{
+    int off_src = (op1[0] == '%') ? off_set(op1.substr(1)) : -1;
+    int off_dest = (op2[0] == '%') ? off_set(op2.substr(1)) : -1;
+    if(op1[0] == '$') fout << " movl " << op1 << ", %eax\n";
+    else if(off_src != -1) fout << " movzbl variabile+" << off_src << ", %eax\n";
+    else fout << " movzbl " << op1 << ", %eax\n";
+    fout << " movzbl tabel_mask(%eax), %eax\n";
+    if(off_dest != -1)
+    {
+        fout << " movzbl variabile+" << off_dest << ", %ebx\n";
+        fout << " movzbl tabel_mask(%ebx), %ebx\n";
+        fout << " movl or_indice_linie(,%eax,4), %ecx\n";
+        fout << " movzbl (%ecx,%ebx,1), %edx\n";
+        fout << " movl %edx, variabile+" << off_dest << "\n";
+    }
+    else
+    {
+        fout << " movzbl " << op2 << ", %ebx\n";
+        fout << " movzbl tabel_mask(%ebx), %ebx\n";
+        fout << " movl or_indice_linie(,%eax,4), %ecx\n";
+        fout << " movzbl (%ecx,%ebx,1), %edx\n";
+        fout << " movl %edx, " << op2 << "\n";
+    }
+}
+
+void ParsareShl(string linie)
 {
     string instructiune, v1, v2;
-    instructiune = v1 = v2 = "";
     Scoatere_Instructiune(linie, instructiune, v1, v2);
-    string r_src = v1;
-    if(r_src[0] == '%' || r_src[0] == '$') r_src = r_src.substr(1);
-    string r_dest = v2;
-    if(r_dest[0] == '%') r_dest = r_dest.substr(1);
-    int off_src = (v1[0] == '%') ? off_set(r_src) : -1;
-    int off_dest = off_set(r_dest);
-    if(off_dest == -1) Eroare();
-    if(v1[0] == '$') fout << " movl " << v1 << ", %eax\n";
-    else fout << " movzbl variabile+" << off_src << ", %eax\n";
-    fout << " movzbl tabel_mask(%eax), %eax\n";
-    fout << " movzbl variabile+" << off_dest << ", %ebx\n";
-    fout << " movzbl tabel_mask(%ebx), %ebx\n";
-    fout << " movl or_indice_linie(,%eax,4), %ecx\n";
-    fout << " movzbl (%ecx,%ebx,1), %edx\n";
-    fout << " movl %edx, variabile+" << off_dest << "\n";
-    fout << " movl zero_indice_linie(,%edx,4), %ecx\n";
-    fout << " movzbl (%ecx,%edx,1), %eax\n";
-    fout << " movb %al, flag_zero\n";
+
+    if (v2[0] == '%') 
+    { 
+        string regName = v2.substr(1);
+        int off = off_set(regName);
+        
+        fout << " movzbl variabile+" << off << ", %eax\n"; 
+        fout << " movzbl tabel_mask(%eax), %eax\n";
+        
+        if (v1[0] == '$') 
+            fout << " movl " << v1 << ", %ebx\n";
+        else
+        { 
+            int off_count = off_set(v1.substr(1));
+            fout << " movzbl variabile+" << off_count << ", %ebx\n";
+        }
+        fout << " movzbl tabel_mask(%ebx), %ebx\n";
+
+        fout << " movl shl_indice_linie(,%eax,4), %ecx\n";
+        fout << " movzbl (%ecx,%ebx,1), %edx\n";
+        fout << " movl %edx, variabile+" << off << "\n";
+    }
+}
+
+void ParsareShr(string linie) {
+    string instructiune, v1, v2;
+    Scoatere_Instructiune(linie, instructiune, v1, v2);
+
+    if (v2[0] == '%') 
+    {
+        string regName = v2.substr(1);
+        int off = off_set(regName);
+        fout << " movzbl variabile+" << off << ", %eax\n";
+        fout << " movzbl tabel_mask(%eax), %eax\n";
+        
+        if (v1[0] == '$') 
+            fout << " movl " << v1 << ", %ebx\n";
+        else 
+        {
+            int off_count = off_set(v1.substr(1));
+            fout << " movzbl variabile+" << off_count << ", %ebx\n";
+        }
+        fout << " movzbl tabel_mask(%ebx), %ebx\n";
+
+        fout << " movl shr_indice_linie(,%eax,4), %ecx\n";
+        fout << " movzbl (%ecx,%ebx,1), %edx\n";
+        fout << " movl %edx, variabile+" << off << "\n";
+    }
 }
 
 void ParsareXor(string linie)

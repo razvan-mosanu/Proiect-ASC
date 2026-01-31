@@ -1,20 +1,13 @@
-#include "movinit.h"
+#include <iostream>
 
+#include "movinit.h"
 #include "aritm.h"
 #include "cmp.h"
 #include "jmp.h"
 #include "lea.h"
 #include "logic.h"
 #include "mov.h"
-#include "mul.h"
 #include "push.h"
-
-/**
-De facut:
--mul
--shl
--shr
-*/
 
 void Parsare()
 {
@@ -22,6 +15,12 @@ void Parsare()
     size_t poz;
     while(getline(fin,linie))
     {
+        if (linie.empty()) continue;
+        if (linie.find(':') != string::npos && linie.find("indice_linie") == string::npos)
+        {
+            fout << " " << linie << "\n";
+            continue;
+        }
         string instructiune, v1, v2;
         instructiune = v1 = v2 = "";
         if(linie.size() == 0) continue;
@@ -75,6 +74,14 @@ void Parsare()
         if(poz != string::npos)
         {
             ParsareCmp(linie);
+            continue;
+        }
+        poz = linie.find("jmp"); 
+        if(poz != string::npos)
+        {
+            Prelucrare_Linie(linie);
+            string v = linie.substr(4);
+            fout << " jmp " << v << "\n";
             continue;
         }
         poz = linie.find("je");
@@ -176,10 +183,11 @@ void Parsare()
             ParsareAnd(linie);
             continue;
         }
-        poz = linie.find("or");
-        if(poz != string::npos && linie.find("or_indice") == string::npos && linie.find("greater_or_equal") == string::npos)
+        string cmd = "", op1 = "", op2 = ""; 
+        Scoatere_Instructiune(linie, cmd, op1, op2);
+        if(cmd == "or" || cmd == "orl")
         {
-            ParsareOr(linie);
+            ParsareOr(op1, op2);
             continue;
         }
         poz = linie.find("loop");
@@ -210,20 +218,31 @@ void Parsare()
         poz = linie.find("imul");
         if (poz != string::npos)
         {
+            ParsareImul(linie);
             continue;
         }
         poz = linie.find("mul");
         if (poz != string::npos)
         {
+            ParsareMul(linie);
             continue;
         }
         poz = linie.find("shl");
         if (poz != string::npos)
         {
+            ParsareShl(linie);
             continue;
         }
         poz = linie.find("shr");
+        if (poz != string::npos)
         {
+            ParsareShr(linie);
+            continue;
+        }
+        poz = linie.find("call"); 
+        if(poz != string::npos)
+        {
+            fout << " " << linie << "\n";
             continue;
         }
         fout << " " << linie << "\n";
@@ -240,10 +259,15 @@ int main(int args, char *argv[])
     for (int i = 1; i < args; i++)
     {
         string str_out(argv[i]);
-        size_t poz = str_out.find_last_of("/");
-        string nume = str_out.substr(poz + 1, str_out.length() - poz);
-        str_out = str_out.substr(0, poz) + "mov_" + str_out;
-     
+        size_t poz = str_out.rfind("/");
+        if (poz != string::npos)
+        {
+            string nume = str_out.substr(poz + 1, str_out.length() - poz);
+            str_out = str_out.substr(0, poz+1) + "mov_" + nume;
+        }
+        else 
+            str_out = "mov_" + str_out;
+        
         Deschide_Fisiere(argv[i], str_out);
         if (!fin)
         {

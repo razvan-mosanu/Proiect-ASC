@@ -1,4 +1,6 @@
+#include "movinit.h"
 #include "mov.h"
+#include <sstream>
 
 void ParsareMov(string linie)
 {

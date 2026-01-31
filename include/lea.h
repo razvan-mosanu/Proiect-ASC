@@ -1,5 +1,6 @@
 #pragma once
 
-#include "movinit.h"
+#include <string>
+using std::string;
 
 extern void ParsareLea(string linie);

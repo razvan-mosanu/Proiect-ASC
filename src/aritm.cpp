@@ -1,3 +1,4 @@
+#include "movinit.h"
 #include "aritm.h"
 
 void ParsareAdd(string linie) 
@@ -134,6 +135,70 @@ void ParsareInc(string linie)
         fout << " movzbl (%ecx,%ebx,1), %edx\n";
         fout << " movb %dl, flag_carry\n";
     }
+}
+
+void ParsareMul(string linie)
+{
+    Prelucrare_Linie(linie);
+    string v = "";
+    size_t procent = linie.find('%');
+    
+    fout << " movzbl variabile+0, %eax\n"; 
+    fout << " movzbl tabel_mask(%eax), %eax\n";
+
+    if(procent != string::npos) // Cazul mul %reg
+    {
+        v = linie.substr(procent + 1);
+        int off = off_set(v);
+        if(off == -1) Eroare();
+        fout << " movzbl variabile+" << off << ", %ebx\n";
+    }
+    else // Cazul mul memorie
+    {
+        v = linie.substr(4);
+        fout << " movzbl " << v << ", %ebx\n";
+    }
+    fout << " movzbl tabel_mask(%ebx), %ebx\n";
+
+    fout << " movl mul_lo_indice_linie(,%eax,4), %ecx\n";
+    fout << " movzbl (%ecx,%ebx,1), %edx\n";
+    fout << " movl %edx, variabile+0\n";
+
+    fout << " movl mul_hi_indice_linie(,%eax,4), %ecx\n";
+    fout << " movzbl (%ecx,%ebx,1), %edx\n";
+    fout << " movl %edx, variabile+12\n";
+}
+
+void ParsareImul(string linie)
+{
+    Prelucrare_Linie(linie);
+    string v = "";
+    size_t procent = linie.find('%');
+    
+    fout << " movzbl variabile+0, %eax\n"; 
+    fout << " movzbl tabel_mask(%eax), %eax\n";
+
+    if(procent != string::npos)
+    {
+        v = linie.substr(procent + 1);
+        int off = off_set(v);
+        if(off == -1) Eroare();
+        fout << " movzbl variabile+" << off << ", %ebx\n";
+    }
+    else
+    {
+        v = linie.substr(5); 
+        fout << " movzbl " << v << ", %ebx\n";
+    }
+    fout << " movzbl tabel_mask(%ebx), %ebx\n";
+
+    fout << " movl mul_lo_indice_linie(,%eax,4), %ecx\n";
+    fout << " movzbl (%ecx,%ebx,1), %edx\n";
+    fout << " movl %edx, variabile+0\n";
+
+    fout << " movl imul_hi_indice_linie(,%eax,4), %ecx\n";
+    fout << " movzbl (%ecx,%ebx,1), %edx\n";
+    fout << " movl %edx, variabile+12\n";
 }
 
 void ParsareSub(string linie)

@@ -1,4 +1,6 @@
 #include "movinit.h"
+#include <iostream>
+#include <algorithm>
 
 ifstream fin;
 ofstream fout;
@@ -30,10 +32,14 @@ void Indici_Tabel_Div();
 
 void Tabel_And();
 void Tabel_Or();
+void Tabel_Shl();
+void Tabel_Shr();
 void Indici_Tabele_Logice();
 
 void Tabel_Mul();
+void Tabel_Carry_Mul();
 void Indici_Tabel_Mul();
+void Tabel_Imul_Hi();
 
 
 void Deschide_Fisiere(string in, string out) 
@@ -50,7 +56,7 @@ void Inchide_Fisiere()
 
 void Eroare()
 {
-    fout << "NU ESTE BINE SCRIS FISIERUL DAT";
+    cerr << "NU ESTE BINE SCRIS FISIERUL DAT\n";
     exit(1);
 }
 
@@ -85,9 +91,14 @@ void Init()
             
     Tabel_And();
     Tabel_Or();
+    Tabel_Shl();
+    Tabel_Shr();
+
     Indici_Tabele_Logice();
 
     Tabel_Mul();
+    Indici_Tabel_Mul();
+    Tabel_Imul_Hi();
 }
 
 int mai_mic(int a, int b)
@@ -105,7 +116,7 @@ void Tabel_Signed_Less()
     {
         fout << " .byte ";
         for(int j=0; j<N; j++)
-            fout << (j == 0 ? "" : ",") << mai_mic(j, i);
+            fout << (j == 0 ? "" : ",") << mai_mic(i, j);
         fout << "\n";
     }
 }
@@ -257,19 +268,22 @@ void Carry_Add_Indice_Linie()
     fout << "\n";
 }
 
-int off_set(string registru)
+int off_set(string registru) 
 {
-    if (registru == "eax") return 0;
-    if (registru == "ebx") return 4;
-    if (registru == "ecx") return 8;
-    if (registru == "edx") return 12;
-    if (registru == "esi") return 16;
-    if (registru == "edi") return 20;
-    if (registru == "esp") return 24;
-    if (registru == "ebp") return 28;
-    return -1;
-}
+    registru.erase(remove(registru.begin(), registru.end(), ' '), registru.end());
+    registru.erase(remove(registru.begin(), registru.end(), '\t'), registru.end());
+    
+    if (registru == "eax" || registru == "ax" || registru == "ah" || registru == "al") return 0;
+    if (registru == "ebx" || registru == "bx" || registru == "bh" || registru == "bl") return 4;
+    if (registru == "ecx" || registru == "cx" || registru == "ch" || registru == "cl") return 8;
+    if (registru == "edx" || registru == "dx" || registru == "dh" || registru == "dl") return 12;
+    if (registru == "esi" || registru == "si") return 16;
+    if (registru == "edi" || registru == "di") return 20;
+    if (registru == "ebp" || registru == "bp") return 24;
+    if (registru == "esp" || registru == "sp") return 28;
 
+    return -1; 
+}
 void Scoatere_Instructiune(string s, string &x, string &y, string &z)
 {
     int i, lungime;
@@ -423,6 +437,43 @@ void Tabel_Or()
     }
 }
 
+void Tabel_Shl() 
+{
+    int i, j;
+    fout << "tabel_shl:\n";
+    for (i = 0; i < N; i++) 
+    {
+        fout << " .byte ";
+        for (j = 0; j < N; j++) {
+            int res = (i << j) & (N - 1); 
+            fout << (j == 0 ? "" : ",") << res;
+        }
+        fout << "\n";
+    }
+    fout << "\nshl_indice_linie:\n";
+    for (i = 0; i < N; i++)
+        fout << " .long tabel_shl + " << i * N << "\n";
+}
+
+void Tabel_Shr() 
+{
+    int i, j;
+    fout << "tabel_shr:\n";
+    for (i = 0; i < N; i++) 
+    {
+        fout << " .byte ";
+        for (j = 0; j < N; j++)
+        {
+            int res = (j >= 4) ? 0 : (i >> j); 
+            fout << (j == 0 ? "" : ",") << res;
+        }
+        fout << "\n";
+    }
+    fout << "\nshr_indice_linie:\n";
+    for (i = 0; i < N; i++)
+        fout << " .long tabel_shr + " << i * N << "\n";
+}
+
 void Indici_Tabele_Logice()
 {
     int i;
@@ -440,10 +491,85 @@ void Indici_Tabele_Logice()
 
 void Tabel_Mul()
 {
-    
+    int i, j;
+
+    fout << "tabel_mul_lo:\n";
+    for(i = 0; i < N; i++) 
+    {
+        fout << " .byte 0";
+        for(j = 1; j < N; j++) 
+            fout << "," << (i * j) % N;
+        fout << "\n";
+    }
+    fout << "\n";
+
+    fout << "tabel_mul_hi:\n";
+    for(i = 0; i < N; i++) 
+    {
+        fout << " .byte 0";
+        for(j = 1; j < N; j++) 
+            fout << "," << (i * j) / N;
+        fout << "\n";
+    }
+    fout << "\n";
+}
+
+void Tabel_Carry_Mul()
+{
+    int i, j;
+    fout << "tabel_add_carry:\n";
+    for(i = 0; i < N; i++) {
+        fout << " .byte " << (i + 0) / N;
+        for(j = 1; j < N; j++)
+            fout << "," << (i + j) / N;
+        fout << "\n";
+    }
+    fout << "\n";
+
+    fout << "add_carry_indice_linie:\n";
+    for(i = 0; i < N; i++)
+        fout << " .long tabel_add_carry + " << i * N << "\n";
+    fout << "\n";
 }
 
 void Indici_Tabel_Mul()
 {
+    int i;
 
+    fout << "mul_lo_indice_linie:\n";
+    for(i = 0; i < N; i++)
+        fout << " .long tabel_mul_lo + " << i * N << "\n";
+    fout << "\n";
+
+    fout << "mul_hi_indice_linie:\n";
+    for(i = 0; i < N; i++)
+        fout << " .long tabel_mul_hi + " << i * N << "\n";
+    fout << "\n";
+}
+
+void Tabel_Imul_Hi()
+{
+    int i, j;
+    int aux = N / 2;
+    fout << "tabel_imul_hi:\n";
+    for(i = 0; i < N; i++) 
+    {
+        int a = i;
+        if(a >= aux) a = a - N;
+
+        fout << " .byte ";
+        for(j = 0; j < N; j++) 
+        {
+            int b = j;
+            if(b >= aux) b = b - N;
+            int res = a * b;
+            fout << (j == 0 ? "" : ",") << ((res >> 4) & 0x0F);
+        }
+        fout << "\n";
+    }
+    fout << "\n";
+    fout << "imul_hi_indice_linie:\n";
+    for(i = 0; i < N; i++)
+        fout << " .long tabel_imul_hi + " << i * N << "\n";
+    fout << "\n";
 }

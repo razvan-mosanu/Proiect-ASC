@@ -70,8 +70,6 @@ Pentru dezvoltarea acestui proiect au fost consultate următoarele resurse privi
     * [Vizionează videoclipul](https://www.youtube.com/watch?v=RPQD7-AOjMI)
 * **Christopher Domas - The Movfuscator**: Prezentarea originală a proiectului care demonstrează cum o singură instrucțiune (MOV) poate fi suficientă pentru a crea un sistem complet.
     * [Vizionează prezentarea](https://www.youtube.com/watch?v=hsNDLVUzYEs)
-* **Christopher Domas - DerbyCon 5**: O prezentare aprofundată despre utilizarea Movfuscator ca tehnică de "anti-reverse engineering" prin eliminarea fluxului de control tradițional.
-    * [Vizionează prezentarea de la DerbyCon](https://www.youtube.com/watch?v=wiFI5cqE49q)
 * **Proiectul Movfuscator pe GitHub**: Codul sursă și documentația tehnică a compilatorului.
     * [Accesează repository-ul](https://github.com/xoreaxeaxeax/movfuscator)
 

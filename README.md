@@ -1,4 +1,4 @@
-# Movfuscator v1.0 - Proiect ASC (FMI Edition)
+# Movfuscator v1.0 - Proiect ASC 
 
 ## 📌 Descriere Proiect
 Acest proiect implementează un translator de instrucțiuni x86 (sintaxă AT&T) bazat pe paradigma **OISC** (One Instruction Set Computer). Scopul principal este înlocuirea a **cât mai multe** instrucțiuni standard cu instrucțiunea `MOV`, utilizând tabele de lookup precalculate pentru simularea logicii hardware.

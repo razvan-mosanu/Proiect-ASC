@@ -1,4 +1,4 @@
-#include "../include/mov.h"
+#include "mov.h"
 
 void ParsareMov(string linie)
 {

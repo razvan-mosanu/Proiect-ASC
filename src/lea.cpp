@@ -1,4 +1,4 @@
-#include "../include/lea.h"
+#include "lea.h"
 
 void ParsareLea(string linie)
 {

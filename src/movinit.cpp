@@ -1,4 +1,4 @@
-#include "../include/movinit.h"
+#include "movinit.h"
 
 ifstream fin;
 ofstream fout;
@@ -440,6 +440,7 @@ void Indici_Tabele_Logice()
 
 void Tabel_Mul()
 {
+    
 }
 
 void Indici_Tabel_Mul()

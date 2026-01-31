@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
 
+include_directories(include)
+
 add_executable(movfuscator 
     src/main.cpp
     src/aritm.cpp
@@ -17,5 +19,6 @@ add_executable(movfuscator
     src/push.cpp
     src/jmp.cpp
     src/lea.cpp
+    src/mul.cpp
 )
 

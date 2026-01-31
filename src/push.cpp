@@ -1,4 +1,4 @@
-#include "../include/push.h"
+#include "push.h"
 
 void ParsarePush(string linie)
 {

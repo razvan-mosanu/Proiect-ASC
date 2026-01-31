@@ -1,11 +1,13 @@
-#include "../include/movinit.h"
-#include "../include/mov.h"
-#include "../include/aritm.h"
-#include "../include/push.h"
-#include "../include/cmp.h"
-#include "../include/logic.h"
-#include "../include/jmp.h"
-#include "../include/lea.h"
+#include "movinit.h"
+
+#include "aritm.h"
+#include "cmp.h"
+#include "jmp.h"
+#include "lea.h"
+#include "logic.h"
+#include "mov.h"
+#include "mul.h"
+#include "push.h"
 
 /**
 De facut:
@@ -230,7 +232,6 @@ void Parsare()
 
 int main(int args, char *argv[])
 {
-    ios_base::sync_with_stdio(0);
     if (args == 1)
     {
         cout << "Utilizare: ./movfuscator file1.s file2.s ...\n";
@@ -239,7 +240,9 @@ int main(int args, char *argv[])
     for (int i = 1; i < args; i++)
     {
         string str_out(argv[i]);
-        str_out = "mov" + str_out;
+        size_t poz = str_out.find_last_of("/");
+        string nume = str_out.substr(poz + 1, str_out.length() - poz);
+        str_out = str_out.substr(0, poz) + "mov_" + str_out;
      
         Deschide_Fisiere(argv[i], str_out);
         if (!fin)

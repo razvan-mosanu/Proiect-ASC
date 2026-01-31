@@ -1,4 +1,4 @@
-#include "../include/cmp.h"
+#include "cmp.h"
 
 void ParsareCmp(string linie)
 {

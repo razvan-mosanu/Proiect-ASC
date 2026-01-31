@@ -1,4 +1,4 @@
-#include "../include/aritm.h"
+#include "aritm.h"
 
 void ParsareAdd(string linie) 
 {

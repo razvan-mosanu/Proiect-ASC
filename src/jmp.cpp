@@ -1,4 +1,4 @@
-#include "../include/jmp.h"
+#include "jmp.h"
 
 void ParsareJe(string linie)
 {

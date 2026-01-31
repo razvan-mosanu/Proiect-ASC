@@ -62,4 +62,16 @@ Proiectul a fost testat cu succes pe exercițiile din **Laboratorul 0x02 și 0x0
 * **Acoperire**: Instrucțiunile x86 care nu au un modul de translatare dedicat sunt păstrate în forma lor originală în fișierul de ieșire.
 
 ---
+
+---
+
+## 📚 Referințe și Resurse
+Pentru dezvoltarea acestui proiect au fost consultate următoarele resurse privind conceptul de Turing completeness și implementarea originală a Movfuscator-ului:
+
+* *Turing Complete - Computerphile*: O explicație detaliată a conceptului de Turing completeness și a cerințelor minime pentru ca un sistem să poată executa orice calcul.
+* *Christopher Domas - The Movfuscator*: Prezentarea originală a proiectului care demonstrează cum o singură instrucțiune (MOV) poate fi suficientă pentru a crea un sistem complet.
+* *Christopher Domas - DerbyCon 5*: O prezentare aprofundată despre utilizarea Movfuscator ca tehnică de "anti-reverse engineering" prin eliminarea fluxului de control tradițional.
+
+---
+
 *Proiect realizat pentru disciplina Arhitectura Sistemelor de Calcul.*
